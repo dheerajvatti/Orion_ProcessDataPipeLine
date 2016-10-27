@@ -1,0 +1,85 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2014-04-01-preview/deploymentTemplate.json#",
+    "contentVersion": "0.9.0.0",
+    "parameters": {
+        "clusterName": {
+            "type": "string",
+            "metadata": {
+                "description": "The name of the HDInsight cluster to create."
+            }
+        }
+    },
+    "resources": [
+        {
+            "apiVersion": "2015-03-01-preview",
+            "name": "SecdheeSparkTest",
+            "type": "Microsoft.HDInsight/clusters",
+            "location": "eastus",
+            "dependsOn": [
+                "Microsoft.Storage/storageAccounts/secdheesparktest"
+            ],
+            "properties": {
+                "clusterVersion": "3.4",
+                "osType": "Linux",
+                "tier": "standard",
+                "clusterDefinition": {
+                    "kind": "spark",
+                    "configurations": {
+                        "gateway": {
+                            "restAuthCredential.isEnabled": true,
+                            "restAuthCredential.username": "admin",
+                            "restAuthCredential.password": "Welcome123456!"
+                        },
+                        "core-site": {
+                            "fs.defaultFS": "wasb://secdheesparktest@secdheesparktest.blob.core.windows.net",
+                            "fs.azure.account.key.secdheesparktest.blob.core.windows.net": "[listKeys('Microsoft.Storage/storageAccounts/secdheesparktest', '2015-05-01-preview').key1]"
+                        }
+                    }
+                },
+                "computeProfile": {
+                    "roles": [
+                        {
+                            "name": "headnode",
+                            "minInstanceCount": 1,
+                            "targetInstanceCount": 2,
+                            "hardwareProfile": {
+                                "vmSize": "Standard_D4_V2"
+                            },
+                            "osProfile": {
+                                "linuxOperatingSystemProfile": {
+                                    "username": "adminssh",
+                                    "password": "Welcome123456!"
+                                }
+                            },
+                            "scriptActions": []
+                        },
+                        {
+                            "name": "workernode",
+                            "minInstanceCount": 1,
+                            "targetInstanceCount": 4,
+                            "hardwareProfile": {
+                                "vmSize": "Standard_D4_V2"
+                            },
+                            "osProfile": {
+                                "linuxOperatingSystemProfile": {
+                                    "username": "adminssh",
+                                    "password": "Welcome123456!"
+                                }
+                            },
+                            "scriptActions": []
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts",
+            "name": "secdheesparktest",
+            "apiVersion": "2015-05-01-preview",
+            "location": "eastus",
+            "properties": {
+                "accountType": "Standard_LRS"
+            }
+        }
+    ]
+}
